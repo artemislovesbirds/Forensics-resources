@@ -79,8 +79,8 @@ CTF digital forensics process (according to me):
 1. Preservation - Main goal: avoid corrupting the data
 2. Examination - inspect (and find) files of interest
 3. Analysis - interpret the data
-No identification or collection needed (the files are given to you) 
-No reporting needed (except for handing in the flag)
+No identification or collection needed (the files are given to you) <br>
+No reporting needed (except for handing in the flag) <br>
 No chain of custody
 ---
 # File system basics
@@ -90,8 +90,8 @@ No chain of custody
 3. A file system defines how files are named, stored, and retrieved from a storage device
    - For our purposes, this broad definition is enough
 
-Storage devices (hereafter disk) contain information, sometimes including an OS, file system, files etc.
-A disk image is a *snapshot* of a disk
+Storage devices (hereafter disk) contain information, sometimes including an OS, file system, files etc. <br>
+A disk image is a *snapshot* of a disk <br>
 A disk is usually partitioned i.e. split into different sections. 
 1. On a computer there is usually one partition for the OS (and related files), one for user files, and one for swapping (not important for this presentation)
 ---
@@ -105,12 +105,29 @@ A disk is usually partitioned i.e. split into different sections.
    - Size
    - Timestamps
    - Block pointers (i.e. location)
-     - Data on a storage device is sectioned into blocks (e.g. 4096 bytes per block, `stat dir` in linux to see what your system uses)
+     - Data on a storage device is sectioned into blocks
+     - Check block size with `stat dirname` in linux or mac terminal, `fsutil fsinfo ntfsInfo C:` in Windows powershell (blocks are named clusters in Windows)
      - Indirect single, double and triple blocks (might delete unless used as an example later)
 ---
 # File system basics
 ## Deleting files
-
+What happens when a file is deleted?
+1. It depends (on the file system)
+2. When a file is deleted in ext4 the inode reference is removed along with the metadata (e.g. the block pointer)
+3. When a file is deleted in NTFS:
+   - The Master File Table (MFT) entry is set to free
+     - It still contains information about the file until it is overwritten 
+   - The file is put into the recycle bin
+     - Parent directory is set to $Recycle_Bin
+     - File renamed to $R\[randomSixCharacters\]
+     - A file with the same name as the deleted file except starting with $I is added containing metadata about the original file e.g. original directory
+       - An I$ file is added each time the file is deleted
+       - Interesting from a forensics standpoint even if the R$ file has been deleted
+4. When a file is deleted in HFS+
+   - APS complicates recovery
+5. For all of these file systems, the data still sits on it's block even if there is no pointer to it
+   - It can, however, be overwritten
+6. Bonus: some file systems do handle safe file deletion like 
 
 # File system basics
 ## Journaling
