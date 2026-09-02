@@ -39,11 +39,12 @@
 ---
 # What you will (hopefully) learn
 1. The digital forensics and CTF forensics procedure
-2. Basic information about file systems
-3. How to access disk images while ensuring the integrity of the data
-4. How to recover deleted files
-5. How to analyze them
-6. If we have time: anti-forensics against file recovery
+2. Brief recap about file systems (could be its own workshop, this is the sweet and **short** version)
+3. File deletion on different file systems
+4. How to access disk images while ensuring the integrity of the data
+5. How to recover deleted files
+6. How to analyze them
+7. If we have time: anti-forensics against file recovery
 ---
 # The plan
 1. Basic practices
@@ -109,8 +110,7 @@ A disk is usually partitioned i.e. split into different sections.
      - Check block size with `stat dirname` in linux or mac terminal, `fsutil fsinfo ntfsInfo C:` in Windows powershell (blocks are named clusters in Windows)
      - Indirect single, double and triple blocks (might delete unless used as an example later)
 ---
-# File system basics
-## Deleting files
+# File deletion
 What happens when a file is deleted?
 1. It depends (on the file system)
 2. When a file is deleted in ext4 the inode reference is removed along with the metadata (e.g. the block pointer)
@@ -124,13 +124,31 @@ What happens when a file is deleted?
        - An I$ file is added each time the file is deleted
        - Interesting from a forensics standpoint even if the R$ file has been deleted
 4. When a file is deleted in HFS+
+   - The catalog record (MacOS' Inode equivalent) in the Catalog File is removed 
    - APS complicates recovery
-5. For all of these file systems, the data still sits on it's block even if there is no pointer to it
+     - TRIM -> asynchronous deletion on the SSD (look it up)
+     - Native encryption (crypto-erase) -> key is gone == data (practically) not recoverable
+     - Snapshots -> (look it up)
+     - Copy-on-write -> Data is not modified in place, instead in an Object Map (look that up)
+6. For all of these file systems, the data still sits on it's block even if there is no pointer to it
    - It can, however, be overwritten
-6. Bonus: some file systems do handle safe file deletion like 
+   - Crypto-erase -> data not recoverable
+7. Bonus:
+   - StegFS
+   - exFAT (read the paper because this is fun)
 
-# File system basics
-## Journaling
+# Safe disk analysis
+Ideally copy and hash e.g.: <br>
+`dd if=/dev/SOURCE of=/dev/DESTINATION` <br>
+`md5sum disk.img` <br>
+1. Makes it easier to ensure you are not working on a faulty copy
+   - Flag might have been deleted (example on next slide)
+
+CTF is low stakes, you can always download the file again
+
+# Journaling
+
+
 
 
 # Resources
