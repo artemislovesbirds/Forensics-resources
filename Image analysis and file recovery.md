@@ -140,28 +140,32 @@ What happens when a file is deleted?
 # Safe disk analysis
 ## Assuming you receive an img file
 ### Ideally copy and hash e.g.: <br>
-`md5sum original.img > original.md5`
-`dd if=/dev/original.img of=/dev/workingcopy.img` <br>
-`md5sum workingcopy.img > workingcopy.md5` <br>
-`diff original.md5 workingcopy.md5` -> should give an empty result if identical
-OR: <br>
-`dc3dd if=/dev/original.img of=/dev/workingcopy.img hash=md5 log=acquire.log`
-- Copying and hashing in one line
-- Error logging file
-- Needs to be installed
 1. Makes it easier to ensure you are not working on a faulty copy
    - Flag might have been deleted if improperly accessed
      - Example: mounting the img file
 2. Remember: CTF is low stakes, you can always download the file again
+3. How to:
+  - `md5sum original.img > original.md5`
+  - `dd if=/dev/original.img of=/dev/workingcopy.img` <br>
+  - `md5sum workingcopy.img > workingcopy.md5` <br>
+  - `diff original.md5 workingcopy.md5` -> should give an empty result if identical
+<br>
+OR: <br>
+  - `dc3dd if=/dev/original.img of=/dev/workingcopy.img hash=md5 log=acquire.log` for copying
+    - Copying and hashing in one line
+    - Error logging file
+    - Needs to be installed
 <br>
 
 ### Extracting data
-Commandline tool: binwalk <br>
-`binwalk -e disk.img`
-  - Extracts all _recognized_ files in the disk via file carving i.e. extracting files based on file headers and footers (magic numbers)
-    - Caveat: missing magic numbers may obfuscate data e.g. file header missing in PNG
-      - Cause: (partial) overwriting of data
-<br> Need another tool for accessing partially deleted file data
+Commandline tools: <br>
+1. PhotoRec
+2. `binwalk -e disk.img`
+  - Will work for most CTF challenges
+  - NOT the forensic standard
+  - Carves everything in the file's byte stream regardless of filesystem
+    - Caveat: does not care about file system context (deleted data, slack space)
+      - Example: missing magic numbers may obfuscate data
 Another tool: Sluethkit
 
 
