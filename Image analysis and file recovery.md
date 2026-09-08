@@ -142,15 +142,40 @@ Ideally copy and hash e.g.: <br>
 `dd if=/dev/SOURCE of=/dev/DESTINATION` <br>
 `md5sum disk.img` <br>
 1. Makes it easier to ensure you are not working on a faulty copy
-   - Flag might have been deleted (example on next slide)
+   - Flag might have been deleted if improperly accessed (example next slide)
 
-CTF is low stakes, you can always download the file again
+CTF is low stakes, you can always download the file again <br>
 
+
+`binwalk -e disk.img`
+  - Extracts all _accessible_ files in the disk
+  - Uses magic number carving
+    - Caveat: missing magic numbers may obfuscate data e.g. IEND missing in PNG
+      - Cause: overwritten data
+
+---
+# Safe disk analysis
+## Example of anti-forensics in a CTF
+
+---
 # Journaling
 
 
+---
+# Slack space
+
+---
+# Challenge walkthrough
 
 
+---
+# Terminal disk forensics cheat-sheet
+
+
+---
+# Tools
+1. sleuthkit
+---
 # Resources
 [1] Arshad, Humaira & Jantan, Aman & Abiodun, Oludare. (2018). Digital Forensics: Review of Issues in Scientific Validation of Digital Evidence. Journal of Information Processing Systems. 14. 346 ~ 376. 10.3745/JIPS.03.0095.
 [2] https://www.freecodecamp.org/news/file-systems-architecture-explained
