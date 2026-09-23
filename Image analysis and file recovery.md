@@ -1,5 +1,5 @@
 # The world of deleted files
-## A presentation on how to work with images/partitions and file recovery
+## A presentation on how to work with images/partitions and file recovery in a CTF context
 ### By Mia
 
 ---
