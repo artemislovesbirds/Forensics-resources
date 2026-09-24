@@ -1,28 +1,43 @@
-# The world of deleted files
-## A presentation on how to work with images/partitions and file recovery in a CTF context
-### By Mia
+# Disk image forensics for CTFs
+## By Mia
 
 ---
-# Introduction to me
+# whoami
 My name is Mia <br>
 I study software design and I am writing my thesis <br>
 I made the 'Bird Lover' and 'Something sounds off' challenges <br>
   - And no one has solved them yet! Go and do them right after this
-  - Fun and bird related forensics
-  - Not related to today at all though
-That's all you need to know about me
+  - Fun and bird related forensics (Steganography)
+  - Not related to disk forensics
+<br>
+In retrospect I should have done a workshop on Steganography so you could actually do them (oh well)
 
 ---
-## Why disk image forensics is interesting
+# Brief introduction to the topic
+What is digital forensics?
+- The analysis of digital media to detect forgery or manipulation (Wiktionary)
+- Digital forensics is the process of collecting and analyzing digital evidence in a way that maintains its integrity and admissibility in court. (IBM)
+
+What is forensics in a CTF context? <br>
+Challenges that deal with topics like:
+- Examining file metadata, finding hidden files in directories, changing image scaling to find the flag (common tricks you might see)
+- Finding hidden data within files (Steganography)
+  - Includes examining hex values within images, finding hidden messages in pixels, finding hidden data in audio files, extracting embedded files and much more
+- Examining network data (Network forensics)
+  - Identifying suspicious traffic, finding leaked data in packets and more
+- Examining disk images (Disk forensics, our focus today)
+  - Examining deleted files and deleted data in the slack space, disk image anti-forensics, detecting timeline tampering (will not be covered today) and more
+- Forensics as a whole has more topics within incident response, malware analysis, forgery detection, anti-forensics etc. these are just the types of challenges I have seen the most
+- Anti-forensics: avoiding detection
+---
+# Why disk image forensics is interesting
 1. Professional and academic relevance
   - Blue team: Investigative work (incident response, police investigations)
   - Red team: anti-forensics
   - Open problems [1]:
     - Standard datasets, SOP (organizational change), anti-forensics 
 ---
-# Introduction to the presentation
-
-## Why disk image forensics is interesting
+# Why disk image forensics is interesting
 1. Professional and academic relevance
   - Blue team: Investigative work (incident response, police investigations)
   - Red team: anti-forensics
@@ -31,9 +46,7 @@ That's all you need to know about me
 2. It is fun
   - You will feel like a detective
 ---
-# Introduction
-
-## Why disk image forensics is interesting
+# Why disk image forensics is interesting
 1. Professional and academic relevance
   - Blue team: Investigative work (incident response, police investigations)
   - Red team: anti-forensics
@@ -46,35 +59,25 @@ That's all you need to know about me
   - Skills are transferable: reverse engineering
 ---
 # What I need from you
-  - Please install sleuthkit if you haven't already if you want to follow along
-  - If you want to do the harder challenges install autopsy (comes with Kali linux)
-  - Please ask questions if you are confused (about forensics)
+  - I assume you know how a CTF works (if not raise your hand)
+  - Please install sleuthkit now if you want to follow along and haven't already installed it
+    - on linux: sudo apt install sleuthkit
+    - Mac and Windows: download available online, just search for "sleuthkit download"
+  - If you want to do the harder challenges on this topic install autopsy (comes with Kali linux)
+  - Please ask questions if you are confused (about forensics, not in general)
   - Please clap at the end and tell me how good it was
 ---
 # What you will (hopefully) learn
 1. The digital forensics and CTF forensics procedure
-2. Brief recap about file systems (could be its own workshop, this is the sweet and **short** version)
+2. Brief recap about file systems (could be its own workshop, this is the sweet and ***short*** version)
 3. File deletion on different file systems
 4. How to access disk images while ensuring the integrity of the data
 5. How to recover deleted files
 6. How to analyze them
-7. If we have time: anti-forensics against file recovery
----
-# The plan
-1. Basic practices
-2. File system basics
-3. Working with images safely
-4. Types of forensics analysis
-5. Inspecting the image
-6. Analysing the data
-7. Walkthrough of a challenge
-8. Anti-forensics (if we have time)
-9. Resources and recommendations
-
+7. If we have time: anti-forensics against file recovery and more
+There will be a walkthrough of two challenges from Cylab (formerly PicoCTF)[2]
 ---
 # Forensic procedure
-## Digital forensics Lite
-
 Traditional digital forensics process:
 1. Identification
 2. Preservation - hash, copy, never touch the original
@@ -89,17 +92,17 @@ Chain of custody, care and control
 3. Perform analysis on mirror-image copies
 ---
 # Forensic procedure
-
 CTF digital forensics process (according to me):
 1. Preservation - Main goal: avoid corrupting the data
-2. Examination - inspect and find files of interest (no need to really verify)
+ - Some challenges detect bad practices and delete the flag (more on this later) 
+2. Examination - inspect and find files of interest (no need to verify)
 3. Analysis - interpret the data (find the flag)
 No identification or collection needed (the files are given to you) <br>
 No reporting needed (except for handing in the flag) <br>
 No chain of custody
 ---
 # File system basics
-### Mostly based on Lavarian's post [2]
+### Mostly based on Lavarian's post [3]
 1. For our purposes: files are connected data
 2. A directory (also a file) organizes groups of files
 3. A file system defines how files are named, stored, and retrieved from a storage device
@@ -128,8 +131,8 @@ A disk is usually partitioned i.e. split into different sections.
 # File deletion
 What happens when a file is deleted?
 1. It depends (on the file system)
-2. When a file is deleted in ext4 the inode reference is removed along with the metadata (e.g. the block pointer)
-3. When a file is deleted in NTFS:
+2. When a file is deleted in ext4 (Linux) the inode reference is removed along with the metadata (e.g. the block pointer)
+3. When a file is deleted in the NT File System (NTFS) (Windows):
    - The Master File Table (MFT) entry is set to free
      - It still contains information about the file until it is overwritten 
    - The file is put into the recycle bin
@@ -138,11 +141,11 @@ What happens when a file is deleted?
      - A file with the same name as the deleted file except starting with $I is added containing metadata about the original file e.g. original directory
        - An I$ file is added each time the file is deleted
        - Interesting from a forensics standpoint even if the R$ file has been deleted
-4. When a file is deleted in HFS+
-   - The catalog record (MacOS' Inode equivalent) in the Catalog File is removed 
-   - APS complicates recovery
+4. When a file is deleted in Apple systems
+   - The catalog record (MacOS' Inode equivalent) in the Catalog File is removed (true for the Hierarchical File System and Apple File System (AFS))
+   - AFS complicates recovery
      - TRIM -> asynchronous deletion on the SSD (look it up)
-     - Native encryption (crypto-erase) -> key is gone == data (practically) not recoverable
+     - Native encryption (crypto-erase), if the key is gone -> data (practically) not recoverable
      - Snapshots -> (look it up)
      - Copy-on-write -> Data is not modified in place, instead in an Object Map (look that up)
 6. For all of these file systems, the data still sits on it's block even if there is no pointer to it
@@ -170,10 +173,17 @@ OR: <br>
     - Copying and hashing in one line
     - Error logging file
     - Needs to be installed
-<br>
 
-### Extracting data
-NOTE: I will showcase all of them, a lot of information now but it will make sense
+---
+# Safe disk analysis
+## Extracting data
+One rule you must always follow: DON'T MOUNT THE DISK IMAGE <br>
+It gives problems you would rather not have, use autopsy or the other tools e.g. tsk_recover
+
+---
+# Safe disk analysis
+## Extracting data
+NOTE: I will showcase a lot of information now, but it will make sense in the walkthrough
 Commandline tools: <br>
 1. tsk_recover (sleuthkit)
   - export files from an image into a local directory
@@ -181,7 +191,7 @@ Commandline tools: <br>
 2. mmls (sleuthkit)
   - gives partition layout of a volume system
   - e.g. start and end bytes of each partition
-  - important to set the offset for all other command line tools (I love mmls)
+  - important to set the offset for all other command line tools
 3. fls (sleuthkit)
   - list file and directory names in a disk image
 4. fsstat (sleuthkit)
@@ -202,12 +212,6 @@ Another tool: Autopsy
 
 ---
 # Safe disk analysis
-## In a ctf setting
-One rule you must always follow: DON'T MOUNT IT <br>
-It gives problems you would rather not have, use autopsy or the other tools I recommended i.e. tsk_recover
-
----
-# Safe disk analysis
 ## How it works in a more realistic forensics case (for those who are interested)
 ### Scenario: you get a USB (sdb)
 1. Ensure auto-mount is disabled
@@ -220,14 +224,6 @@ It gives problems you would rather not have, use autopsy or the other tools I re
 ---
 # Challenge walkthrough 1
 
-
----
-# Journaling
-1. Your system logs things you do/your system does
-2. Depending on settings it might be cleared on reboot (default is persistent storage)
-3. Examples:
-   - history: overview of commandline prompts
-   - journalctl: overview of processes
 
 ---
 # Slack space
@@ -248,14 +244,33 @@ How do we access it:
 
 ---
 # Anti-forensics
+## I.e. how to cover your tracks
+### Journaling
+1. Your system logs things you do/your system does
+2. Depending on settings it might be cleared on reboot (default is persistent storage)
+3. Examples:
+   - history: overview of commandline prompts
+   - journalctl: overview of processes
+4. Goal of an attacker is to manipulate these logs
+### Making data unsalvageable
+1. trim
+2. encryption
+### File manipulation
+1. Steganography, goal -> hide data in seemingly normal files
+### If you were to think like a malware designer
+1. Think about how the processes operate in a system
+2. File names and indicators automated detection systems might tag
 
+---
+# Sneak peak of a Hack for Snack challenge
 
 ---
 # Thank you for coming to my ted talk
 Questions? <br>
-You can also come up to me and ask me about forensics challenges or software design or birds
+You can also just come up to me and ask me about forensics challenges, software design and/or birds
 
 ---
 # Resources
 [1] Arshad, Humaira & Jantan, Aman & Abiodun, Oludare. (2018). Digital Forensics: Review of Issues in Scientific Validation of Digital Evidence. Journal of Information Processing Systems. 14. 346 ~ 376. 10.3745/JIPS.03.0095.
-[2] https://www.freecodecamp.org/news/file-systems-architecture-explained
+[2] https://learn.cylabacademy.org/dashboard
+[3] https://www.freecodecamp.org/news/file-systems-architecture-explained
