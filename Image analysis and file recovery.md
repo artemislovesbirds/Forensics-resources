@@ -36,22 +36,6 @@ Challenges that deal with topics like:
   - Red team: anti-forensics
   - Open problems [1]:
     - Standard datasets, SOP (organizational change), anti-forensics 
----
-# Why disk image forensics is interesting
-1. Professional and academic relevance
-  - Blue team: Investigative work (incident response, police investigations)
-  - Red team: anti-forensics
-  - Open problems [1]:
-    - Standard datasets, SOP (organizational change), anti-forensics 
-2. It is fun
-  - You will feel like a detective
----
-# Why disk image forensics is interesting
-1. Professional and academic relevance
-  - Blue team: Investigative work (incident response, police investigations)
-  - Red team: anti-forensics
-  - Open problems [1]:
-    - Standard datasets, SOP (organizational change), anti-forensics 
 2. It is fun
   - You will feel like a detective
 3. Useful
@@ -253,11 +237,11 @@ How do we access it:
    - journalctl: overview of processes
 4. Goal of an attacker is to manipulate these logs
 ### Making data unsalvageable
-1. trim
-2. encryption
+1. shred - (linux) - think of a paper shredder, goes over an changes the file multiple times so it is difficult to find the original content
+2. encryption - impossible (if choosing secure crypto) to retrieve without the key, remember to safely handle/delete the key!
 ### File manipulation
 1. Steganography, goal -> hide data in seemingly normal files
-### If you were to think like a malware designer
+### And more: i.e. if you were to think like a malware designer
 1. Think about how the processes operate in a system
 2. File names and indicators automated detection systems might tag
 
@@ -271,6 +255,6 @@ You can also just come up to me and ask me about forensics challenges, software 
 
 ---
 # Resources
-[1] Arshad, Humaira & Jantan, Aman & Abiodun, Oludare. (2018). Digital Forensics: Review of Issues in Scientific Validation of Digital Evidence. Journal of Information Processing Systems. 14. 346 ~ 376. 10.3745/JIPS.03.0095.
-[2] https://learn.cylabacademy.org/dashboard
-[3] https://www.freecodecamp.org/news/file-systems-architecture-explained
+[1] Arshad, Humaira & Jantan, Aman & Abiodun, Oludare. (2018). Digital Forensics: Review of Issues in Scientific Validation of Digital Evidence. Journal of Information Processing Systems. 14. 346 ~ 376. 10.3745/JIPS.03.0095. <br>
+[2] https://learn.cylabacademy.org/dashboard <br>
+[3] https://www.freecodecamp.org/news/file-systems-architecture-explained <br>
