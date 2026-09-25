@@ -191,7 +191,7 @@ Commandline tools: <br>
       - Example: missing magic numbers may obfuscate data
       - What is a magic number? - the reason why you should petition for me to make another forensics workshop (i.e. we will ignore it for now)
 Another tool: Autopsy
-  - Builds on all the sleuthkit tools and gives an ok UI (a little old looking)
+  - Builds on all the sleuthkit tools with a UI
   - Does most of the work for you compared to sleuthkit
 
 ---
